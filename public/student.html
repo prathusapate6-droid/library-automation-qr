@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard | The Scholarly Monolith</title>
+  <meta name="description" content="Student library dashboard — scan QR codes, request books, and track your reading history." />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#002045', 'primary-container': '#1a365d', 'primary-fixed': '#d6e3ff', 'on-primary-fixed': '#001b3c',
+            secondary: '#855300', 'secondary-container': '#fea619', 'on-secondary-container': '#684000',
+            'tertiary-container': '#5c2600', 'on-tertiary-container': '#f0813a', 'tertiary-fixed': '#ffdbca',
+            'error': '#ba1a1a', 'error-container': '#ffdad6', 'on-error-container': '#93000a',
+            background: '#f7f9fb', surface: '#f7f9fb', 'surface-dim': '#d8dadc',
+            'surface-container': '#eceef0', 'surface-container-low': '#f2f4f6',
+            'surface-container-lowest': '#ffffff', 'surface-container-high': '#e6e8ea',
+            'on-surface': '#191c1e', 'on-surface-variant': '#43474e',
+            'outline': '#74777f', 'outline-variant': '#c4c6cf',
+          },
+          fontFamily: { headline: ['Manrope'], body: ['Inter'], label: ['Inter'] },
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-nav { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    .bottom-nav-item.active span.nav-icon { color: #fea619; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .bottom-nav-item.active span.nav-label { color: #fea619; }
+    .bottom-nav-item.active::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: #fea619; margin-top: 2px; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-28">
+
+  <!-- ═══ Top Header ═══ -->
+  <header class="w-full sticky top-0 z-50 bg-slate-50/95 backdrop-blur-sm flex justify-between items-center px-5 py-3.5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center" id="headerAvatar">
+        <span class="text-white font-bold text-sm" id="headerInitials">ST</span>
+      </div>
+      <span class="text-lg font-extrabold text-blue-950 font-headline">The Scholarly Monolith</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="refreshBtn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200/50 transition-colors">
+        <span class="material-symbols-outlined text-blue-900">refresh</span>
+      </button>
+      <button id="logoutBtn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-50 transition-colors">
+        <span class="material-symbols-outlined text-red-600">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-5 pt-6 pb-8">
+
+    <!-- ═══ HOME VIEW ═══ -->
+    <section id="view-home" class="view-section active space-y-8 animate-fade-in">
+      <!-- Welcome Section -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="md:col-span-8">
+          <h1 class="text-4xl md:text-5xl font-extrabold text-primary mb-3 leading-tight">
+            Welcome back, <br/><span class="text-secondary" id="welcomeName">Student</span>
+          </h1>
+          <p class="text-on-surface-variant max-w-xl text-base leading-relaxed" id="welcomeSubtext">
+            Your intellectual journey continues. Scan a QR code to request a book.
+          </p>
+        </div>
+        <div class="md:col-span-4 flex flex-col justify-end">
+          <div class="bg-surface-container p-6 rounded-xl flex flex-col gap-1">
+            <span class="text-secondary font-bold text-3xl font-headline tracking-tighter" id="totalBorrows">0</span>
+            <span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Total Borrows</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Scan Hero -->
+      <div>
+        <button id="heroScanBtn" class="w-full group relative overflow-hidden bg-gradient-to-br from-primary to-primary-container p-10 md:p-12 rounded-xl text-white flex flex-col items-center justify-center gap-5 transition-all hover:shadow-[0_8px_32px_rgba(0,32,69,0.15)] active:scale-[0.99]">
+          <div class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container shadow-lg group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined !text-4xl" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+          </div>
+          <div class="text-center">
+            <h3 class="text-2xl font-bold font-headline mb-1">Scan QR to Issue Book</h3>
+            <p class="text-blue-200 opacity-80 font-label text-sm uppercase tracking-wider">Instant Archival Retrieval</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Currently Issued Books -->
+      <div>
+        <div class="flex justify-between items-end mb-5">
+          <h2 class="text-2xl font-black text-primary font-headline">Currently Issued</h2>
+          <span class="text-secondary font-semibold text-sm font-label flex items-center gap-1 cursor-pointer" onclick="switchStudentView('history')">
+            View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </span>
+        </div>
+        <div id="issuedCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <p class="text-sm text-slate-400 text-center py-8 col-span-full">Loading your books...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SCAN VIEW ═══ -->
+    <section id="view-scan" class="view-section space-y-6">
+      <h2 class="text-2xl font-black text-primary font-headline">Scan QR Code</h2>
+      <p class="text-sm text-on-surface-variant">Point your camera at the book's QR code, or enter the code manually.</p>
+
+      <div class="bg-surface-container-lowest rounded-xl p-6 space-y-4">
+        <div id="scanner" class="w-full min-h-[280px] rounded-xl overflow-hidden bg-surface-container flex items-center justify-center">
+          <div class="text-center text-slate-400">
+            <span class="material-symbols-outlined text-5xl mb-2 block opacity-30">photo_camera</span>
+            <p class="text-sm">Camera preview will appear here</p>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="startScanBtn" class="px-5 py-3 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-bold flex items-center gap-2 hover:shadow-lg transition-all">
+            <span class="material-symbols-outlined text-sm">qr_code_scanner</span> Start Scanner
+          </button>
+          <button id="stopScanBtn" class="px-5 py-3 rounded-xl bg-surface-container text-primary font-bold hover:bg-slate-200 transition-colors">
+            Stop
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual Entry -->
+      <div class="bg-surface-container-lowest rounded-xl p-6">
+        <label class="text-[10px] uppercase tracking-widest font-bold text-secondary">Manual Book Code</label>
+        <div class="flex gap-3 mt-2">
+          <input id="manualCode" class="flex-1 rounded-xl border-0 bg-surface-container-low px-5 py-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="LIB_BOOK_0001" />
+          <button id="manualSendBtn" class="px-6 py-4 rounded-xl bg-secondary-container text-on-secondary-container font-bold hover:shadow-lg transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">send</span> Send
+          </button>
+        </div>
+      </div>
+      <div id="scanMsg" class="text-sm"></div>
+    </section>
+
+    <!-- ═══ BOOKS VIEW ═══ -->
+    <section id="view-books" class="view-section space-y-6">
+      <h2 class="text-2xl font-black text-primary font-headline">Available Books</h2>
+      <p class="text-sm text-on-surface-variant">Browse all books in the library collection.</p>
+      <div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+        <div class="overflow-auto max-h-[65vh]">
+          <table class="w-full text-left">
+            <thead class="sticky top-0 bg-surface-container-low">
+              <tr>
+                <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Code</th>
+                <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Book</th>
+                <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Status</th>
+              </tr>
+            </thead>
+            <tbody id="booksBody" class="divide-y divide-slate-50"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ HISTORY VIEW ═══ -->
+    <section id="view-history" class="view-section space-y-8">
+      <!-- My Requests -->
+      <div>
+        <h2 class="text-2xl font-black text-primary font-headline mb-4">My Requests</h2>
+        <div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+          <div class="overflow-auto max-h-[400px]">
+            <table class="w-full text-left">
+              <thead class="sticky top-0 bg-surface-container-low">
+                <tr>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">ID</th>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Book</th>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Status</th>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Date</th>
+                </tr>
+              </thead>
+              <tbody id="requestsBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issued History -->
+      <div>
+        <h2 class="text-2xl font-black text-primary font-headline mb-4">Issue History</h2>
+        <div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+          <div class="overflow-auto max-h-[400px]">
+            <table class="w-full text-left">
+              <thead class="sticky top-0 bg-surface-container-low">
+                <tr>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Book</th>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Issued At</th>
+                  <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Return</th>
+                </tr>
+              </thead>
+              <tbody id="issuedBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ACCOUNT VIEW ═══ -->
+    <section id="view-account" class="view-section space-y-6">
+      <h2 class="text-2xl font-black text-primary font-headline">My Account</h2>
+      <div class="bg-surface-container-lowest rounded-xl p-8 space-y-6">
+        <div class="flex items-center gap-5">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-white font-bold text-2xl" id="profileAvatar">ST</div>
+          <div>
+            <h3 class="font-headline font-bold text-2xl text-primary" id="profileName">—</h3>
+            <p class="text-on-surface-variant" id="profileEmail">—</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-surface-container-low rounded-xl p-5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Class / Department</p>
+            <p class="font-semibold text-primary" id="profileClass">—</p>
+          </div>
+          <div class="bg-surface-container-low rounded-xl p-5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">College</p>
+            <p class="font-semibold text-primary" id="profileCollege">—</p>
+          </div>
+        </div>
+        <button id="accountLogoutBtn" class="w-full py-4 rounded-xl bg-red-50 text-red-700 font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">logout</span> Logout
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══ Bottom Navigation Bar ═══ -->
+  <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center pt-3 pb-6 px-4 glass-nav rounded-t-2xl z-50 shadow-[0_-8px_32px_rgba(0,0,0,0.06)]">
+    <a class="bottom-nav-item active flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors" data-view="home">
+      <span class="material-symbols-outlined nav-icon" style="font-variation-settings: 'FILL' 1;">home</span>
+      <span class="nav-label text-[10px] font-semibold uppercase tracking-wider">Home</span>
+    </a>
+    <a class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-400 cursor-pointer hover:text-blue-900 transition-colors" data-view="books">
+      <span class="material-symbols-outlined nav-icon">menu_book</span>
+      <span class="nav-label text-[10px] font-semibold uppercase tracking-wider">Books</span>
+    </a>
+    <!-- QR Scan Center Button -->
+    <div class="relative -top-5">
+      <button id="navScanBtn" class="w-14 h-14 bg-secondary rounded-full flex items-center justify-center text-white shadow-lg ring-4 ring-background hover:scale-105 transition-transform active:scale-95">
+        <span class="material-symbols-outlined !text-3xl" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+      </button>
+    </div>
+    <a class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-400 cursor-pointer hover:text-blue-900 transition-colors" data-view="history">
+      <span class="material-symbols-outlined nav-icon">history</span>
+      <span class="nav-label text-[10px] font-semibold uppercase tracking-wider">History</span>
+    </a>
+    <a class="bottom-nav-item flex flex-col items-center justify-center gap-0.5 text-slate-400 cursor-pointer hover:text-blue-900 transition-colors" data-view="account">
+      <span class="material-symbols-outlined nav-icon">person</span>
+      <span class="nav-label text-[10px] font-semibold uppercase tracking-wider">Account</span>
+    </a>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="/js/student.js"></script>
+</body>
+</html>

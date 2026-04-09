@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Librarian Command | The Scholarly Monolith</title>
+  <meta name="description" content="Admin panel for library management — manage inventory, approve requests, track issued books." />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#002045', 'primary-container': '#1a365d', 'primary-fixed': '#d6e3ff', 'on-primary-fixed': '#001b3c',
+            secondary: '#855300', 'secondary-container': '#fea619', 'on-secondary-container': '#684000',
+            'tertiary-container': '#5c2600', 'on-tertiary-container': '#f0813a', 'tertiary-fixed': '#ffdbca',
+            'error': '#ba1a1a', 'error-container': '#ffdad6', 'on-error-container': '#93000a',
+            background: '#f7f9fb', surface: '#f7f9fb', 'surface-dim': '#d8dadc',
+            'surface-container': '#eceef0', 'surface-container-low': '#f2f4f6',
+            'surface-container-lowest': '#ffffff', 'surface-container-high': '#e6e8ea',
+            'on-surface': '#191c1e', 'on-surface-variant': '#43474e',
+            'outline': '#74777f', 'outline-variant': '#c4c6cf',
+          },
+          fontFamily: { headline: ['Manrope'], body: ['Inter'], label: ['Inter'] },
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-headline { font-family: 'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .nav-item.active { background: white; color: #002045; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transform: translateX(4px); border-radius: 12px 0 0 12px; }
+    .stat-icon { font-variation-settings: 'FILL' 1; }
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex selection:bg-secondary-container/30">
+
+  <!-- ═══════════════ Sidebar ═══════════════ -->
+  <aside id="sidebar" class="h-screen w-72 fixed left-0 top-0 bg-slate-100 flex flex-col py-8 z-40 transition-transform -translate-x-full md:translate-x-0">
+    <div class="px-8 mb-6">
+      <h1 class="text-2xl font-black text-blue-950 font-headline">The Scholarly Monolith</h1>
+    </div>
+
+    <!-- Admin Profile -->
+    <div class="px-8 mb-8">
+      <div class="flex items-center gap-3 bg-slate-200/60 p-4 rounded-xl">
+        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm" id="adminAvatar">AD</div>
+        <div>
+          <p class="font-headline font-bold text-sm text-blue-950" id="adminName">Librarian</p>
+          <p class="text-xs text-slate-500">Command Center</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 flex flex-col px-4 space-y-1">
+      <a class="nav-item active ml-0 pl-6 py-3 flex items-center gap-4 rounded-xl cursor-pointer transition-all duration-200" data-view="dashboard">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-sm font-medium">Dashboard</span>
+      </a>
+      <a class="nav-item text-slate-600 pl-6 py-3 flex items-center gap-4 rounded-xl cursor-pointer hover:bg-slate-200 transition-all" data-view="inventory">
+        <span class="material-symbols-outlined">library_books</span>
+        <span class="text-sm font-medium">Inventory & QR</span>
+      </a>
+      <a class="nav-item text-slate-600 pl-6 py-3 flex items-center gap-4 rounded-xl cursor-pointer hover:bg-slate-200 transition-all" data-view="requests">
+        <span class="material-symbols-outlined">pending_actions</span>
+        <span class="text-sm font-medium">Requests</span>
+        <span id="navPendingBadge" class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold hidden">0</span>
+      </a>
+      <a class="nav-item text-slate-600 pl-6 py-3 flex items-center gap-4 rounded-xl cursor-pointer hover:bg-slate-200 transition-all" data-view="issued">
+        <span class="material-symbols-outlined">history_edu</span>
+        <span class="text-sm font-medium">Issued Books</span>
+      </a>
+      <a class="nav-item text-slate-600 pl-6 py-3 flex items-center gap-4 rounded-xl cursor-pointer hover:bg-slate-200 transition-all" data-view="analytics">
+        <span class="material-symbols-outlined">analytics</span>
+        <span class="text-sm font-medium">Analytics</span>
+      </a>
+      <a class="nav-item text-slate-600 pl-6 py-3 flex items-center gap-4 rounded-xl cursor-pointer hover:bg-slate-200 transition-all" data-view="settings">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-sm font-medium">Settings</span>
+      </a>
+    </nav>
+
+    <!-- Bottom Actions -->
+    <div class="px-8 space-y-2 pt-6 border-t border-slate-200 mt-4">
+      <button id="logoutBtn" class="w-full py-3 rounded-xl bg-red-50 text-red-700 font-bold text-sm hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-sm">logout</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ Main Content ═══════════════ -->
+  <main class="md:ml-72 flex-1 min-h-screen">
+    <!-- Top Bar -->
+    <header class="w-full sticky top-0 z-30 bg-slate-50/95 backdrop-blur-sm flex justify-between items-center px-6 md:px-8 py-4">
+      <div class="flex items-center gap-4">
+        <!-- Mobile menu toggle -->
+        <button id="menuToggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200 transition-colors">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div>
+          <h2 class="font-headline font-bold text-lg text-blue-900">System Command</h2>
+          <span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400">Library Management Terminal</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="refreshBtn" class="px-4 py-2 rounded-lg bg-surface-container text-primary text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+        </button>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 space-y-8">
+
+      <!-- ═══ DASHBOARD VIEW ═══ -->
+      <section id="view-dashboard" class="view-section active space-y-8 animate-fade-in">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group hover:shadow-md transition-shadow">
+            <div class="absolute -right-4 -top-4 text-primary opacity-[0.03] scale-150 transition-transform group-hover:scale-[1.7] duration-500">
+              <span class="material-symbols-outlined text-[100px] stat-icon">library_books</span>
+            </div>
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1">Active Catalog</p>
+            <h3 class="text-4xl font-headline font-extrabold text-primary mb-2" id="statTotalBooks">—</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed font-bold" id="statAvailable">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group hover:shadow-md transition-shadow">
+            <div class="absolute -right-4 -top-4 text-secondary opacity-[0.03] scale-150 transition-transform group-hover:scale-[1.7] duration-500">
+              <span class="material-symbols-outlined text-[100px] stat-icon">history_edu</span>
+            </div>
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1">Currently Issued</p>
+            <h3 class="text-4xl font-headline font-extrabold text-primary mb-2" id="statIssued">—</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-secondary-container/20 text-on-secondary-container font-bold" id="statIssuedToday">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group hover:shadow-md transition-shadow">
+            <div class="absolute -right-4 -top-4 text-primary-container opacity-[0.03] scale-150 transition-transform group-hover:scale-[1.7] duration-500">
+              <span class="material-symbols-outlined text-[100px] stat-icon">group</span>
+            </div>
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1">Registered Students</p>
+            <h3 class="text-4xl font-headline font-extrabold text-primary mb-2" id="statStudents">—</h3>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group hover:shadow-md transition-shadow">
+            <div class="absolute -right-4 -top-4 text-error opacity-[0.03] scale-150 transition-transform group-hover:scale-[1.7] duration-500">
+              <span class="material-symbols-outlined text-[100px] stat-icon">pending_actions</span>
+            </div>
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1">Pending Requests</p>
+            <h3 class="text-4xl font-headline font-extrabold text-primary mb-2" id="statPending">—</h3>
+          </div>
+        </div>
+
+        <!-- Dashboard Grid: Recent Requests + Recent Books -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Live Requests Feed -->
+          <div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h4 class="font-headline font-bold text-lg text-primary">Live Requests</h4>
+              <span class="bg-error-container text-on-error-container text-[10px] px-2.5 py-1 rounded-full font-bold" id="dashPendingBadge">0 PENDING</span>
+            </div>
+            <div id="dashRequestsFeed" class="space-y-5 max-h-[400px] overflow-y-auto">
+              <p class="text-sm text-slate-400 text-center py-8">Loading requests...</p>
+            </div>
+            <button class="w-full mt-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary transition-all border-t border-slate-50" onclick="switchView('requests')">
+              VIEW ALL REQUESTS
+            </button>
+          </div>
+
+          <!-- Recent Books Table -->
+          <div class="lg:col-span-7 bg-surface-container-lowest rounded-xl overflow-hidden">
+            <div class="p-6 flex justify-between items-center">
+              <h4 class="font-headline font-bold text-lg text-primary">Latest Books</h4>
+              <button class="bg-primary text-white text-xs font-bold px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-lg shadow-primary/10 hover:shadow-xl transition-shadow" onclick="switchView('inventory')">
+                <span class="material-symbols-outlined text-sm">add</span> ADD NEW
+              </button>
+            </div>
+            <div class="overflow-auto max-h-[400px]">
+              <table class="w-full text-left">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Book</th>
+                    <th class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Code</th>
+                    <th class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashBooksBody" class="divide-y divide-slate-50"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ INVENTORY VIEW ═══ -->
+      <section id="view-inventory" class="view-section space-y-8">
+        <div>
+          <h2 class="text-3xl font-extrabold text-primary tracking-tight font-headline">Book Inventory & QR</h2>
+          <p class="text-on-surface-variant mt-1">Add books, generate QR labels, and download printable PDFs.</p>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+          <!-- Add Book Form -->
+          <div class="xl:col-span-5 bg-surface-container-lowest rounded-xl p-8">
+            <div class="flex items-center gap-3 mb-8">
+              <span class="material-symbols-outlined text-secondary text-3xl">add_circle</span>
+              <h3 class="text-xl font-bold font-headline text-primary">Add New Book</h3>
+            </div>
+            <form id="bookForm" class="space-y-5">
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Book Title</label>
+                <input class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" name="name" placeholder="e.g. Data Structures & Algorithms" required />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Description</label>
+                <textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" rows="3" name="description" placeholder="Brief description of the book"></textarea>
+              </div>
+              <button class="w-full bg-gradient-to-br from-primary to-primary-container text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2" type="submit">
+                <span class="material-symbols-outlined text-sm">save</span> Save Entry & Generate QR
+              </button>
+            </form>
+            <div id="bookMsg" class="mt-3 text-sm"></div>
+          </div>
+
+          <!-- Books Table with QR -->
+          <div class="xl:col-span-7 bg-surface-container-lowest rounded-xl overflow-hidden">
+            <div class="p-6 bg-surface-container/50 flex justify-between items-center">
+              <h3 class="text-lg font-bold font-headline text-primary">Inventory QR Labels</h3>
+              <button id="batchPdfBtn" class="text-xs font-bold text-secondary flex items-center gap-1 hover:underline underline-offset-2">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Batch PDF
+              </button>
+            </div>
+            <div class="overflow-auto max-h-[500px]">
+              <table class="w-full text-left">
+                <thead class="sticky top-0">
+                  <tr class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container-low">
+                    <th class="px-6 py-4">Book</th>
+                    <th class="px-6 py-4">Code</th>
+                    <th class="px-6 py-4">QR</th>
+                    <th class="px-6 py-4">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="booksBody" class="divide-y divide-slate-50"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Batch Card -->
+        <div class="bg-gradient-to-br from-primary to-primary-container rounded-xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h4 class="font-headline font-bold text-xl mb-2">QR Batch Processing</h4>
+            <p class="text-blue-200 text-sm">Generate printable PDF sheets for your entire inventory. Optimized for thermal and laser printers.</p>
+          </div>
+          <button id="catalogPdfBtn" class="bg-secondary-container text-on-secondary-container font-bold px-8 py-3 rounded-xl flex items-center gap-2 hover:shadow-xl transition-all whitespace-nowrap">
+            <span class="material-symbols-outlined text-sm">grid_view</span> Generate Catalog PDF
+          </button>
+        </div>
+      </section>
+
+      <!-- ═══ REQUESTS VIEW ═══ -->
+      <section id="view-requests" class="view-section space-y-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-3xl font-extrabold text-primary tracking-tight font-headline">Pending Requests</h2>
+            <p class="text-on-surface-variant mt-1">Manage student book issuance requests. Review and approve.</p>
+          </div>
+          <div class="flex gap-3">
+            <div class="bg-surface-container-lowest rounded-xl p-4 text-center min-w-[80px]">
+              <span class="text-2xl font-headline font-extrabold text-secondary" id="reqPendingCount">0</span>
+              <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-1">Pending</p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl p-4 text-center min-w-[80px]">
+              <span class="text-2xl font-headline font-extrabold text-primary" id="reqTotalCount">0</span>
+              <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-1">Total</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="flex gap-2 flex-wrap">
+          <button class="req-filter active px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white transition-colors" data-status="">All</button>
+          <button class="req-filter px-4 py-2 rounded-lg text-xs font-bold bg-surface-container-lowest text-slate-600 hover:bg-slate-200 transition-colors" data-status="pending">Pending</button>
+          <button class="req-filter px-4 py-2 rounded-lg text-xs font-bold bg-surface-container-lowest text-slate-600 hover:bg-slate-200 transition-colors" data-status="approved">Approved</button>
+          <button class="req-filter px-4 py-2 rounded-lg text-xs font-bold bg-surface-container-lowest text-slate-600 hover:bg-slate-200 transition-colors" data-status="rejected">Rejected</button>
+        </div>
+
+        <!-- Requests List -->
+        <div id="requestsList" class="space-y-4">
+          <p class="text-sm text-slate-400 text-center py-12">Loading requests...</p>
+        </div>
+      </section>
+
+      <!-- ═══ ISSUED BOOKS VIEW ═══ -->
+      <section id="view-issued" class="view-section space-y-8">
+        <div>
+          <h2 class="text-3xl font-extrabold text-primary tracking-tight font-headline">Issued Books</h2>
+          <p class="text-on-surface-variant mt-1">Track all currently issued and returned books.</p>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+          <div class="overflow-auto">
+            <table class="w-full text-left">
+              <thead class="sticky top-0">
+                <tr class="bg-surface-container-low">
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Student</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Book</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Issue Date</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Return</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Action</th>
+                </tr>
+              </thead>
+              <tbody id="issuedBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ANALYTICS VIEW ═══ -->
+      <section id="view-analytics" class="view-section space-y-8">
+        <div>
+          <h2 class="text-3xl font-extrabold text-primary tracking-tight font-headline">Analytics</h2>
+          <p class="text-on-surface-variant mt-1">Real-time metrics and student activity summary.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-surface-container-lowest rounded-xl p-6">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Books</p>
+            <p id="analyticsTotalBooks" class="text-3xl font-extrabold text-primary mt-2">0</p>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl p-6">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Available</p>
+            <p id="analyticsAvailableBooks" class="text-3xl font-extrabold text-emerald-700 mt-2">0</p>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl p-6">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Pending Requests</p>
+            <p id="analyticsPendingRequests" class="text-3xl font-extrabold text-amber-700 mt-2">0</p>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl p-6">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Students</p>
+            <p id="analyticsStudents" class="text-3xl font-extrabold text-blue-700 mt-2">0</p>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+          <div class="p-5 bg-surface-container">
+            <h3 class="font-headline font-bold text-primary text-lg">Students</h3>
+          </div>
+          <div class="overflow-auto">
+            <table class="w-full text-left">
+              <thead class="sticky top-0">
+                <tr class="bg-surface-container-low">
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Name</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Class</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">College</th>
+                  <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Email</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsStudentsBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SETTINGS VIEW ═══ -->
+      <section id="view-settings" class="view-section space-y-8">
+        <div>
+          <h2 class="text-3xl font-extrabold text-primary tracking-tight font-headline">Settings</h2>
+          <p class="text-on-surface-variant mt-1">Configure panel behavior and refresh settings.</p>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl p-6 max-w-2xl">
+          <div class="space-y-5">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Auto Refresh (seconds)</label>
+              <input id="settingRefreshSec" class="w-full mt-2 bg-surface-container-low rounded-lg border-none px-4 py-3" type="number" min="0" placeholder="0 = disabled" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Default Requests Filter</label>
+              <select id="settingDefaultFilter" class="w-full mt-2 bg-surface-container-low rounded-lg border-none px-4 py-3">
+                <option value="pending">Pending</option>
+                <option value="">All</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="flex gap-3">
+              <button id="saveSettingsBtn" class="bg-primary text-white rounded-lg px-4 py-3 font-bold text-sm">Save Settings</button>
+              <button id="resetSettingsBtn" class="bg-slate-200 text-slate-800 rounded-lg px-4 py-3 font-bold text-sm">Reset</button>
+            </div>
+            <div id="settingsMsg"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Database (will be created on server)
+library.db
+library.db-shm
+library.db-wal
+
+# Expo App (not deployed to Render)
+app/node_modules/
+app/.expo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env

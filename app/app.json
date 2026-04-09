@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Library Automation QR",
+    "slug": "library-automation-qr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "android": {
+      "package": "com.libraryautomation.qr",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Library App to use camera for QR scanning"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "dfd7c7b6-c47c-4599-8653-20d7e67a560c"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.libraryautomation.qr",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

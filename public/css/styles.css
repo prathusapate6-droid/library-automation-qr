@@ -1,0 +1,151 @@
+/* ============================================================
+   The Scholarly Monolith — Design System Stylesheet
+   ============================================================ */
+
+/* ── CSS Variables (Design Tokens) ── */
+:root {
+  --primary: #002045;
+  --primary-container: #1a365d;
+  --primary-fixed: #d6e3ff;
+  --on-primary-fixed: #001b3c;
+  --secondary: #855300;
+  --secondary-container: #fea619;
+  --on-secondary-container: #684000;
+  --tertiary-container: #5c2600;
+  --on-tertiary-container: #f0813a;
+  --tertiary-fixed: #ffdbca;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --background: #f7f9fb;
+  --surface: #f7f9fb;
+  --surface-dim: #d8dadc;
+  --surface-container: #eceef0;
+  --surface-container-low: #f2f4f6;
+  --surface-container-lowest: #ffffff;
+  --surface-container-high: #e6e8ea;
+  --on-surface: #191c1e;
+  --on-surface-variant: #43474e;
+  --outline: #74777f;
+  --outline-variant: #c4c6cf;
+}
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--background);
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-headline, h1, h2, h3 {
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in { animation: fadeIn 0.5s ease-out both; }
+.animate-slide-left { animation: slideInLeft 0.5s ease-out both; }
+.animate-slide-right { animation: slideInRight 0.5s ease-out both; }
+.animate-scale-in { animation: scaleIn 0.4s ease-out both; }
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* ── Glass Panel ── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Toast Notification ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.toast.success { background: #dcfce7; color: #166534; }
+.toast.error { background: #fef2f2; color: #991b1b; }
+.toast.info { background: #eff6ff; color: #1e40af; }
+
+/* ── Status Badge ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.badge-available   { background: var(--primary-fixed); color: var(--on-primary-fixed); }
+.badge-issued      { background: #fff3e0; color: var(--on-secondary-container); }
+.badge-pending     { background: #fff8e1; color: #f57f17; }
+.badge-approved    { background: #e8f5e9; color: #2e7d32; }
+.badge-rejected    { background: var(--error-container); color: var(--on-error-container); }
+.badge-overdue     { background: var(--tertiary-fixed); color: var(--on-tertiary-container); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--outline); }
+
+/* ── Material Symbols ── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ── Transition Helpers ── */
+.transition-all { transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.transition-colors { transition: color 0.2s, background-color 0.2s; }
+.transition-transform { transition: transform 0.2s; }

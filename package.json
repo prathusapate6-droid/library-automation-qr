@@ -1,0 +1,23 @@
+{
+  "name": "library-automation-qr",
+  "version": "1.0.0",
+  "description": "Library Automation System with QR-based issue flow",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "mobile:start": "npm --prefix app run start",
+    "mobile:android": "npm --prefix app run android",
+    "mobile:ios": "npm --prefix app run ios",
+    "mobile:web": "npm --prefix app run web"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  }
+}

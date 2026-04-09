@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "dfd7c7b6-c47c-4599-8653-20d7e67a560c"
+      }
+    },
+    "android": {
+      "package": "com.prathameshsapate.libraryautomationqr"
+    }
+  }
+}

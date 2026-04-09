@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Scholarly Monolith — Library Automation System</title>
+  <meta name="description" content="Digital library automation with QR workflow. Register, scan, request, and track books in real time." />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#002045',
+            'primary-container': '#1a365d',
+            'primary-fixed': '#d6e3ff',
+            'on-primary-fixed': '#001b3c',
+            secondary: '#855300',
+            'secondary-container': '#fea619',
+            'on-secondary-container': '#684000',
+            background: '#f7f9fb',
+            surface: '#f7f9fb',
+            'surface-container-low': '#f2f4f6',
+            'surface-container': '#eceef0',
+            'surface-container-lowest': '#ffffff',
+            'surface-variant': '#e0e3e5',
+            'on-surface': '#191c1e',
+            'on-surface-variant': '#43474e',
+            'outline': '#74777f',
+            'outline-variant': '#c4c6cf',
+            'error': '#ba1a1a',
+          },
+          fontFamily: {
+            headline: ['Manrope', 'system-ui'],
+            body: ['Inter', 'system-ui'],
+            label: ['Inter', 'system-ui'],
+          },
+          borderRadius: {
+            DEFAULT: '0.125rem',
+            lg: '0.25rem',
+            xl: '0.75rem',
+            full: '9999px',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body min-h-screen flex flex-col md:flex-row">
+
+  <!-- ═══ Left Column: Editorial Brand Presence ═══ -->
+  <section class="hidden md:flex md:w-5/12 lg:w-1/2 relative flex-col justify-end p-16 overflow-hidden bg-primary text-white">
+    <div class="absolute inset-0 z-0">
+      <img class="w-full h-full object-cover opacity-30 mix-blend-overlay"
+           src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrKp-CpXQyCsWWNu-kchsnyJt0FHYmKZOtKvTnvpnd_wf41XmibVhIpFH7fVgy920R9isOklYJ1D2OMFt7_JaFnBmIhd5fkjo-SoJW6I7Ii0_NXSKiqul_oA0yS3fp4ZV6MyXhws5uEhP1asQQ1fINW4gtusU5pY7Ij-ipUe85oWBxxVppXOMDOmfOEwH9FythjDYjJOXsOIaLGy2-Ot2IS5bgt4vk0WnxCfp5f2xKsMec8nbHlbUwNvbHBRouYTIemB4DRJuJgQ"
+           alt="Grand classical library with warm intellectual atmosphere" />
+      <div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/40 to-transparent"></div>
+    </div>
+    <div class="relative z-10 max-w-lg animate-fade-in">
+      <h1 class="font-headline font-extrabold text-5xl lg:text-6xl tracking-tight mb-6">
+        The Scholarly Monolith
+      </h1>
+      <p class="text-blue-200 font-body text-xl leading-relaxed mb-8">
+        Digital library automation with QR workflow. Scan, request, and track — all in real time.
+      </p>
+      <div class="flex gap-4 items-center">
+        <div class="flex -space-x-3">
+          <div class="w-10 h-10 rounded-full border-2 border-primary bg-blue-300 flex items-center justify-center text-primary font-bold text-xs">PS</div>
+          <div class="w-10 h-10 rounded-full border-2 border-primary bg-amber-300 flex items-center justify-center text-primary font-bold text-xs">AK</div>
+          <div class="w-10 h-10 rounded-full border-2 border-primary bg-emerald-300 flex items-center justify-center text-primary font-bold text-xs">RV</div>
+        </div>
+        <span class="text-sm font-label uppercase tracking-widest opacity-80">College Library System</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Right Column: Auth Forms ═══ -->
+  <main class="flex-1 flex flex-col justify-center items-center p-6 md:p-12 lg:p-24 bg-surface-container-low">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden w-full mb-10 flex justify-between items-center">
+      <span class="font-headline font-black text-xl text-primary">TSM.</span>
+      <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">account_balance</span>
+      </div>
+    </header>
+
+    <div class="w-full max-w-md animate-fade-in">
+
+      <!-- ── Register Form ── -->
+      <div id="registerView">
+        <div class="mb-8 text-center md:text-left">
+          <h2 class="font-headline font-bold text-3xl text-on-surface mb-2 tracking-tight">Create your ID</h2>
+          <p class="text-on-surface-variant font-body">Complete registration to access the library collection.</p>
+        </div>
+
+        <form id="registerForm" class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">Full Name</label>
+            <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="Enter your full name" type="text" name="name" required />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">Class / Dept</label>
+              <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="e.g. ME-VLSI" type="text" name="className" required />
+            </div>
+            <div>
+              <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">College</label>
+              <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="e.g. GKCE" type="text" name="college" required />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">Email</label>
+            <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="your@email.com" type="email" name="email" required />
+          </div>
+          <div>
+            <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">Password</label>
+            <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="Min 4 characters" type="password" name="password" minlength="4" required />
+          </div>
+
+          <div class="pt-2">
+            <button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-white font-headline font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2" type="submit">
+              <span>Register</span>
+              <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </button>
+          </div>
+          <div id="registerMsg" class="text-sm"></div>
+
+          <div class="flex flex-col items-center gap-3">
+            <p class="text-on-surface-variant text-sm">
+              Already have an account?
+              <a id="showLoginBtn" class="text-secondary font-bold hover:underline decoration-2 underline-offset-4 ml-1 cursor-pointer">Login</a>
+            </p>
+            <div class="flex items-center gap-2 text-[10px] font-label text-outline uppercase tracking-[0.2em] w-full">
+              <hr class="flex-1 border-outline-variant opacity-30" />
+              <span>Secure Access</span>
+              <hr class="flex-1 border-outline-variant opacity-30" />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── Login Form ── -->
+      <div id="loginView" class="hidden">
+        <div class="mb-8 text-center md:text-left">
+          <h2 class="font-headline font-bold text-3xl text-on-surface mb-2 tracking-tight">Welcome back</h2>
+          <p class="text-on-surface-variant font-body">Login to access your library dashboard.</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">Email</label>
+            <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="your@email.com" type="email" name="email" required />
+          </div>
+          <div>
+            <label class="block text-[10px] font-label font-bold uppercase tracking-widest text-secondary mb-1.5 ml-1">Password</label>
+            <input class="w-full px-5 py-4 bg-surface-container-lowest text-on-surface border-none rounded-xl focus:ring-0 shadow-sm focus:shadow-md transition-all placeholder:text-outline-variant" placeholder="Enter your password" type="password" name="password" required />
+          </div>
+
+          <div class="pt-2">
+            <button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-white font-headline font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2" type="submit">
+              <span>Login</span>
+              <span class="material-symbols-outlined text-lg">login</span>
+            </button>
+          </div>
+          <div id="loginMsg" class="text-sm"></div>
+
+          <div class="flex flex-col items-center gap-3">
+            <p class="text-on-surface-variant text-sm">
+              New to the library?
+              <a id="showRegisterBtn" class="text-secondary font-bold hover:underline decoration-2 underline-offset-4 ml-1 cursor-pointer">Register</a>
+            </p>
+          </div>
+
+          <!-- Admin hint -->
+          <div class="mt-4 p-4 bg-surface-container rounded-xl">
+            <p class="text-xs text-on-surface-variant">
+              <span class="font-bold text-primary">Librarian?</span> Use: <code class="text-secondary">admin@library.local</code> / <code class="text-secondary">admin123</code>
+            </p>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center opacity-40">
+      <p class="text-[10px] font-label tracking-widest uppercase">© 2025 The Scholarly Monolith System</p>
+    </footer>
+  </main>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
