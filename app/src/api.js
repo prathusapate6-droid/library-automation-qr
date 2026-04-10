@@ -2,10 +2,13 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 function inferExpoHostBase() {
-  return 'https://library-app-tln5.onrender.com';
+  // ⚠️ UPDATE THIS URL if deploying on a new Render account
+  return 'https://smart-library-b7ue.onrender.com';
 }
 
-const API_BASE = 'https://library-app-tln5.onrender.com';
+// ⚠️ IMPORTANT: Change this URL to your new Render deployment URL
+// Example: 'https://your-app-name.onrender.com'
+const API_BASE = 'https://smart-library-b7ue.onrender.com';
 
 async function request(path, { method = 'GET', token, body } = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
