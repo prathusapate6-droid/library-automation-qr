@@ -34,8 +34,8 @@ import { colors } from './src/theme';
 const STATUS_BAR_HEIGHT = Platform.OS === 'android'
   ? (RNStatusBar.currentHeight || 24)
   : 0; // iOS: SafeAreaView handles it
-// Bottom offset — clears Android gesture navigation bar (typically 24-48px)
-const NAV_BAR_HEIGHT = Platform.OS === 'android' ? 48 : 34;
+// Bottom offset — clears Android gesture/3-button navigation bar (typically 48-72px)
+const NAV_BAR_HEIGHT = Platform.OS === 'android' ? 80 : 34;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const STORAGE_KEY = 'library_session_v1';
