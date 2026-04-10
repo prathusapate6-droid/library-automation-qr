@@ -11,6 +11,7 @@ import {
   Vibration,
   Dimensions,
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -444,6 +445,18 @@ function StudentApp({ session, onLogout }) {
         books.map(b => (
           <Card key={b.id} style={styles.bookListItem}>
             <View style={styles.bookListRow}>
+              {/* Cover image or fallback */}
+              {b.cover_url ? (
+                <Image
+                  source={{ uri: b.cover_url }}
+                  style={styles.bookCoverImg}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.bookCoverPlaceholder}>
+                  <Text style={{ fontSize: 28 }}>📖</Text>
+                </View>
+              )}
               <View style={{ flex: 1 }}>
                 <Text style={styles.bookListName}>{b.name}</Text>
                 <Text style={styles.bookListCode}>{b.code}</Text>
@@ -909,6 +922,11 @@ const styles = StyleSheet.create({
   bookListName: { fontSize: 15, fontWeight: '700', color: colors.primary, marginBottom: 2 },
   bookListCode: { fontSize: 11, color: colors.muted, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   bookListDesc: { fontSize: 12, color: colors.muted, marginTop: 2 },
+  bookCoverImg: { width: 44, height: 60, borderRadius: 6 },
+  bookCoverPlaceholder: {
+    width: 44, height: 60, borderRadius: 6,
+    backgroundColor: 'rgba(0,32,69,0.06)', alignItems: 'center', justifyContent: 'center',
+  },
 
   /* Scan */
   scanPreview: {

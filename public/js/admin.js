@@ -201,11 +201,19 @@ async function renderBooksTable(books) {
   const rows = await Promise.all(
     books.map(async (b) => {
       const url = await qrDataUrl(b.code);
+      const coverHtml = b.cover_url
+        ? `<img src="${b.cover_url}" alt="cover" class="h-14 w-10 rounded object-cover shadow-sm" onerror="this.style.display='none'" />`
+        : `<div class="h-14 w-10 rounded bg-slate-100 flex items-center justify-center text-xl">📖</div>`;
       return `
         <tr class="hover:bg-slate-50/50 transition-colors">
-          <td class="px-6 py-4">
-            <p class="font-semibold text-primary text-sm">${b.name}</p>
-            <p class="text-xs text-slate-400 mt-0.5">${b.description || '—'}</p>
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-3">
+              ${coverHtml}
+              <div>
+                <p class="font-semibold text-primary text-sm">${b.name}</p>
+                <p class="text-xs text-slate-400 mt-0.5">${b.description || '—'}</p>
+              </div>
+            </div>
           </td>
           <td class="px-6 py-4">
             <p class="text-sm font-mono text-slate-600">${b.code}</p>
@@ -236,16 +244,25 @@ async function renderBooksTable(books) {
 function renderDashBooks(books) {
   const body = document.getElementById('dashBooksBody');
   if (!body) return;
-  body.innerHTML = books.map(b => `
+  body.innerHTML = books.map(b => {
+    const coverHtml = b.cover_url
+      ? `<img src="${b.cover_url}" alt="cover" class="h-10 w-8 rounded object-cover" onerror="this.style.display='none'" />`
+      : `<span class="text-lg">📖</span>`;
+    return `
     <tr class="hover:bg-slate-50/50 transition-colors">
-      <td class="px-6 py-4">
-        <p class="font-semibold text-primary text-sm">${b.name}</p>
-        <p class="text-xs text-slate-400">${b.description || '—'}</p>
+      <td class="px-4 py-4">
+        <div class="flex items-center gap-3">
+          ${coverHtml}
+          <div>
+            <p class="font-semibold text-primary text-sm">${b.name}</p>
+            <p class="text-xs text-slate-400">${b.description || '—'}</p>
+          </div>
+        </div>
       </td>
       <td class="px-6 py-4 text-sm font-mono text-slate-500">${b.code}</td>
       <td class="px-6 py-4"><span class="badge ${b.available ? 'badge-available' : 'badge-issued'}">${b.available ? 'In Library' : 'Issued'}</span></td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 // ═══ QR PDF ═══
@@ -504,6 +521,7 @@ bookForm.addEventListener('submit', async (e) => {
   const payload = {
     name: String(form.get('name') || '').trim(),
     description: String(form.get('description') || '').trim(),
+    coverUrl: String(form.get('coverUrl') || '').trim(),
   };
 
   try {

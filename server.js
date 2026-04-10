@@ -39,6 +39,7 @@ async function initDb() {
       code TEXT NOT NULL UNIQUE,
       name TEXT NOT NULL,
       description TEXT,
+      cover_url TEXT,
       available INTEGER NOT NULL DEFAULT 1,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
@@ -73,6 +74,9 @@ async function initDb() {
     );
     console.log('Default admin created: admin@library.local / admin123');
   }
+
+  // Add cover_url column to existing tables (safe migration)
+  await pool.query(`ALTER TABLE books ADD COLUMN IF NOT EXISTS cover_url TEXT`);
 
   console.log('Database initialized ✅');
 }
@@ -166,25 +170,25 @@ app.get('/api/me', auth, async (req, res) => {
 /* ── BOOKS ── */
 
 app.get('/api/books', auth, async (req, res) => {
-  const result = await pool.query('SELECT id, code, name, description, available, created_at FROM books ORDER BY id DESC');
+  const result = await pool.query('SELECT id, code, name, description, cover_url, available, created_at FROM books ORDER BY id DESC');
   return res.json({ books: result.rows });
 });
 
 app.post('/api/admin/books', auth, adminOnly, async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, coverUrl } = req.body;
   if (!name) return res.status(400).json({ error: 'Book name is required' });
 
   const tempCode = `TMP_${Date.now()}`;
   const info = await pool.query(
-    'INSERT INTO books (code, name, description, available) VALUES ($1, $2, $3, 1) RETURNING id',
-    [tempCode, name.trim(), (description || '').trim()]
+    'INSERT INTO books (code, name, description, cover_url, available) VALUES ($1, $2, $3, $4, 1) RETURNING id',
+    [tempCode, name.trim(), (description || '').trim(), (coverUrl || '').trim() || null]
   );
   const id = info.rows[0].id;
   const code = `LIB_BOOK_${String(id).padStart(4, '0')}`;
   await pool.query('UPDATE books SET code = $1 WHERE id = $2', [code, id]);
 
   const book = (await pool.query(
-    'SELECT id, code, name, description, available, created_at FROM books WHERE id = $1', [id]
+    'SELECT id, code, name, description, cover_url, available, created_at FROM books WHERE id = $1', [id]
   )).rows[0];
 
   io.to('admins').emit('book:created', book);

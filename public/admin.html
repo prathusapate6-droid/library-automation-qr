@@ -217,7 +217,12 @@
               </div>
               <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Description</label>
-                <textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" rows="3" name="description" placeholder="Brief description of the book"></textarea>
+                <textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" rows="2" name="description" placeholder="Brief description of the book"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Cover Image URL <span class="text-slate-400 normal-case tracking-normal font-normal">(optional)</span></label>
+                <input class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" name="coverUrl" type="url" placeholder="https://example.com/book-cover.jpg" />
+                <p class="text-[10px] text-slate-400 mt-1.5 ml-1">Paste any image URL — students will see this cover photo in the app.</p>
               </div>
               <button class="w-full bg-gradient-to-br from-primary to-primary-container text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2" type="submit">
                 <span class="material-symbols-outlined text-sm">save</span> Save Entry & Generate QR
