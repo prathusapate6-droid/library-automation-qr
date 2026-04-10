@@ -33,6 +33,104 @@ const settingsMsg = document.getElementById('settingsMsg');
 
 const SETTINGS_KEY = 'admin_panel_settings_v1';
 let autoRefreshTimer = null;
+let pendingCoverDataUrl = null; // base64 data URI of selected cover photo
+
+// ── Cover Upload Helpers ──
+function compressImageToPortrait(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onload = () => {
+        // Portrait target: max 400w x 600h, maintain aspect but crop to portrait if landscape
+        const TARGET_W = 400;
+        const TARGET_H = 600;
+        const canvas = document.createElement('canvas');
+        let sw = img.width, sh = img.height, sx = 0, sy = 0;
+
+        // If landscape, center-crop to portrait ratio
+        const imgRatio = sw / sh;
+        const targetRatio = TARGET_W / TARGET_H;
+        if (imgRatio > targetRatio) {
+          // wider than portrait — crop sides
+          sw = Math.round(sh * targetRatio);
+          sx = Math.round((img.width - sw) / 2);
+        } else {
+          // taller than portrait — crop top/bottom
+          sh = Math.round(sw / targetRatio);
+          sy = Math.round((img.height - sh) / 2);
+        }
+
+        canvas.width = TARGET_W;
+        canvas.height = TARGET_H;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, TARGET_W, TARGET_H);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showCoverPreview(dataUrl) {
+  const preview = document.getElementById('coverPreview');
+  const icon = document.getElementById('uploadIcon');
+  const label = document.getElementById('uploadLabel');
+  const hint = document.getElementById('uploadHint');
+  const clearBtn = document.getElementById('clearCoverBtn');
+  preview.src = dataUrl;
+  preview.style.display = 'block';
+  icon.style.display = 'none';
+  label.textContent = 'Photo selected ✔';
+  label.style.color = '#166534';
+  hint.style.display = 'none';
+  clearBtn.style.display = 'inline-block';
+  pendingCoverDataUrl = dataUrl;
+}
+
+function clearCoverPreview() {
+  const preview = document.getElementById('coverPreview');
+  const icon = document.getElementById('uploadIcon');
+  const label = document.getElementById('uploadLabel');
+  const hint = document.getElementById('uploadHint');
+  const clearBtn = document.getElementById('clearCoverBtn');
+  const fileInput = document.getElementById('coverFileInput');
+  preview.src = ''; preview.style.display = 'none';
+  icon.style.display = ''; label.textContent = 'Click or drag & drop a photo here';
+  label.style.color = ''; hint.style.display = '';
+  clearBtn.style.display = 'none';
+  fileInput.value = '';
+  pendingCoverDataUrl = null;
+}
+
+// Wire up upload zone events
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('coverFileInput');
+  const clearBtn = document.getElementById('clearCoverBtn');
+  if (!zone) return;
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const dataUrl = await compressImageToPortrait(file);
+    showCoverPreview(dataUrl);
+  });
+
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const dataUrl = await compressImageToPortrait(file);
+    showCoverPreview(dataUrl);
+  });
+
+  clearBtn.addEventListener('click', (e) => { e.stopPropagation(); clearCoverPreview(); });
+});
 
 // Set admin info
 if (user.name) {
@@ -521,12 +619,13 @@ bookForm.addEventListener('submit', async (e) => {
   const payload = {
     name: String(form.get('name') || '').trim(),
     description: String(form.get('description') || '').trim(),
-    coverUrl: String(form.get('coverUrl') || '').trim(),
+    coverUrl: pendingCoverDataUrl || '',
   };
 
   try {
     const data = await api('/api/admin/books', { method: 'POST', body: JSON.stringify(payload) });
     bookForm.reset();
+    clearCoverPreview();
     setBookMsg(`Book added: ${data.book.code}`, true);
     showToast(`New book added: ${data.book.name}`, 'success');
     await loadAll();

@@ -39,6 +39,48 @@
     .view-section.active { display: block; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
+
+    /* ── Upload Zone ── */
+    #uploadZone {
+      border: 2px dashed #c4c6cf;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f2f4f6;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+    }
+    #uploadZone:hover, #uploadZone.drag-over {
+      border-color: #002045;
+      background: #eef1f6;
+      box-shadow: 0 0 0 4px rgba(0,32,69,0.06);
+    }
+    #uploadZone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    #coverPreview {
+      width: 80px; height: 108px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+      display: none;
+      margin: 0 auto 4px;
+    }
+    #clearCoverBtn {
+      display: none;
+      font-size: 10px; font-weight: 700;
+      color: #ba1a1a; cursor: pointer;
+      background: #ffdad6; border: none;
+      border-radius: 6px; padding: 3px 10px;
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen flex selection:bg-secondary-container/30">
@@ -220,9 +262,15 @@
                 <textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" rows="2" name="description" placeholder="Brief description of the book"></textarea>
               </div>
               <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Cover Image URL <span class="text-slate-400 normal-case tracking-normal font-normal">(optional)</span></label>
-                <input class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-0 focus:shadow-md transition-all placeholder:text-outline-variant" name="coverUrl" type="url" placeholder="https://example.com/book-cover.jpg" />
-                <p class="text-[10px] text-slate-400 mt-1.5 ml-1">Paste any image URL — students will see this cover photo in the app.</p>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Book Cover Photo <span class="text-slate-400 normal-case tracking-normal font-normal">(optional)</span></label>
+                <div id="uploadZone">
+                  <input type="file" id="coverFileInput" accept="image/*" />
+                  <img id="coverPreview" alt="Cover preview" />
+                  <span class="material-symbols-outlined text-3xl text-slate-400" id="uploadIcon">add_photo_alternate</span>
+                  <p class="text-xs font-semibold text-slate-500" id="uploadLabel">Click or drag &amp; drop a photo here</p>
+                  <p class="text-[10px] text-slate-400" id="uploadHint">JPG, PNG, WEBP — auto-resized to portrait</p>
+                  <button type="button" id="clearCoverBtn">&times; Remove photo</button>
+                </div>
               </div>
               <button class="w-full bg-gradient-to-br from-primary to-primary-container text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2" type="submit">
                 <span class="material-symbols-outlined text-sm">save</span> Save Entry & Generate QR
