@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
-   The Scholarly Monolith — Student Mobile App (Expo)
-   QR-Based Library Automation System
+   Smart Library — Student Mobile App (Expo)
+   QR-Based Smart Library System
    ═══════════════════════════════════════════════════════════ */
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
@@ -29,6 +29,13 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { io } from 'socket.io-client';
 import { api, apiBase } from './src/api';
 import { colors } from './src/theme';
+
+// Safe area top offset — clears status bar & notch on all devices
+const STATUS_BAR_HEIGHT = Platform.OS === 'android'
+  ? (RNStatusBar.currentHeight || 24)
+  : 0; // iOS: SafeAreaView handles it
+// Bottom offset — clears Android gesture navigation bar (typically 24-48px)
+const NAV_BAR_HEIGHT = Platform.OS === 'android' ? 48 : 34;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const STORAGE_KEY = 'library_session_v1';
@@ -155,13 +162,13 @@ function AuthScreen({ onAuthenticated }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { paddingTop: STATUS_BAR_HEIGHT }]}>
       <StatusBar style="light" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
         <ScrollView contentContainerStyle={styles.authContainer} keyboardShouldPersistTaps="handled">
           {/* Hero */}
           <View style={styles.authHero}>
-            <Text style={styles.authHeroTitle}>The Scholarly{'\n'}Monolith</Text>
+            <Text style={styles.authHeroTitle}>Smart{'\n'}Library</Text>
             <Text style={styles.authHeroSubtitle}>QR-based library automation</Text>
             <View style={styles.authHeroDivider} />
             <Text style={styles.authHeroSmall}>SCAN · REQUEST · TRACK</Text>
@@ -351,7 +358,7 @@ function StudentApp({ session, onLogout }) {
 
   /* ── HOME TAB ── */
   const renderHome = () => (
-    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {/* Welcome */}
       <View style={styles.welcomeSection}>
         <Text style={styles.welcomeText}>Welcome back,</Text>
@@ -425,7 +432,7 @@ function StudentApp({ session, onLogout }) {
 
   /* ── BOOKS TAB ── */
   const renderBooks = () => (
-    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       <Text style={styles.pageTitle}>Available Books</Text>
       <Text style={styles.pageSub}>Browse all books in the library collection.</Text>
 
@@ -452,7 +459,7 @@ function StudentApp({ session, onLogout }) {
 
   /* ── SCAN TAB ── */
   const renderScan = () => (
-    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       <Text style={styles.pageTitle}>Scan QR Code</Text>
       <Text style={styles.pageSub}>Point your camera at the book's QR code, or enter the code manually.</Text>
 
@@ -490,7 +497,7 @@ function StudentApp({ session, onLogout }) {
 
   /* ── HISTORY TAB ── */
   const renderHistory = () => (
-    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {/* My Requests */}
       <SectionTitle title="My Requests" />
       {requests.length === 0 ? (
@@ -533,7 +540,7 @@ function StudentApp({ session, onLogout }) {
 
   /* ── ACCOUNT TAB ── */
   const renderAccount = () => (
-    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.tabContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       <Text style={styles.pageTitle}>My Account</Text>
 
       <Card style={{ gap: 16 }}>
@@ -609,7 +616,7 @@ function StudentApp({ session, onLogout }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: STATUS_BAR_HEIGHT }]}>
       <StatusBar style="dark" />
 
       {/* Top Header */}
@@ -620,7 +627,7 @@ function StudentApp({ session, onLogout }) {
               {(session.user.name || 'S').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.topHeaderTitle}>The Scholarly Monolith</Text>
+          <Text style={styles.topHeaderTitle}>Smart Library</Text>
         </View>
         <Pressable onPress={loadAll} style={({ pressed }) => [styles.refreshBtn, pressed && { opacity: 0.6 }]}>
           <Text style={{ fontSize: 18 }}>🔄</Text>
@@ -630,8 +637,8 @@ function StudentApp({ session, onLogout }) {
       {/* Tab Content */}
       <View style={{ flex: 1 }}>{renderTab()}</View>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
+      {/* Bottom Navigation — sits above system nav/gesture bar */}
+      <View style={[styles.bottomNav, { paddingBottom: NAV_BAR_HEIGHT }]}>
         {[
           { key: 'home', label: 'Home', icon: '🏠' },
           { key: 'books', label: 'Books', icon: '📚' },
@@ -712,7 +719,7 @@ function StudentApp({ session, onLogout }) {
       </Modal>
 
       <Toast {...toast} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -744,11 +751,11 @@ export default function App() {
 
   if (booting) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]}>
+      <View style={[styles.safe, styles.center]}>
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={{ marginTop: 12, color: colors.muted, fontSize: 13 }}>Loading...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -765,7 +772,7 @@ const styles = StyleSheet.create({
   safe: { 
     flex: 1, 
     backgroundColor: colors.background,
-    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 40) + 10 : 0 
+    // paddingTop is now handled dynamically via useSafeAreaInsets in each screen
   },
   center: { alignItems: 'center', justifyContent: 'center' },
 
@@ -837,7 +844,10 @@ const styles = StyleSheet.create({
   /* Top Header */
   topHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 18, paddingVertical: 10, backgroundColor: 'rgba(247,249,251,0.95)',
+    paddingHorizontal: 18, paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,32,69,0.08)',
   },
   topHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerAvatar: {
@@ -850,7 +860,7 @@ const styles = StyleSheet.create({
   refreshBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 
   /* Tab Content */
-  tabContent: { padding: 18, paddingBottom: 30, gap: 14 },
+  tabContent: { padding: 18, paddingBottom: 40, gap: 12 },
 
   /* Welcome */
   welcomeSection: { gap: 4 },
@@ -902,8 +912,8 @@ const styles = StyleSheet.create({
 
   /* Scan */
   scanPreview: {
-    height: 160, borderRadius: 14, backgroundColor: colors.surfaceSoft,
-    alignItems: 'center', justifyContent: 'center', gap: 8,
+    height: 100, borderRadius: 14, backgroundColor: colors.surfaceSoft,
+    alignItems: 'center', justifyContent: 'center', gap: 6,
   },
   scanPreviewText: { fontSize: 13, color: colors.muted },
   scanBtnRow: { flexDirection: 'row', gap: 10 },
@@ -940,12 +950,13 @@ const styles = StyleSheet.create({
   },
   logoutBtnText: { color: '#991b1b', fontWeight: '800', fontSize: 14 },
 
-  /* Bottom Nav */
+  /* Bottom Nav — paddingBottom is set dynamically via insets.bottom in JSX */
   bottomNav: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
-    paddingTop: 8, paddingBottom: Platform.OS === 'ios' ? 24 : 26,
-    backgroundColor: 'rgba(255,255,255,0.92)', borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    elevation: 12, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.06, shadowRadius: 12,
+    paddingTop: 10,
+    backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    elevation: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.1, shadowRadius: 12,
+    borderTopWidth: 1.5, borderColor: 'rgba(0,32,69,0.10)',
   },
   bottomNavItem: { alignItems: 'center', justifyContent: 'center', paddingVertical: 4, gap: 2 },
   bottomNavIcon: { fontSize: 22, opacity: 0.4 },
