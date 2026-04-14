@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   Admin Panel Logic — The Scholarly Monolith
+   Admin Panel Logic — QR Based Smart Library Management System
    ═══════════════════════════════════════════ */
 
 // ── Auth Guard ──
@@ -372,7 +372,7 @@ async function downloadQrPdf(book) {
   // Header
   pdf.setFontSize(20);
   pdf.setTextColor(0, 32, 69);
-  pdf.text('The Scholarly Monolith', 60, 60);
+  pdf.text('QR Based Smart Library Management System', 60, 60);
   pdf.setFontSize(10);
   pdf.setTextColor(100, 100, 100);
   pdf.text('Library Book QR Label', 60, 80);

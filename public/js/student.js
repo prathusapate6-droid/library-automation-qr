@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   Student Dashboard Logic — The Scholarly Monolith
+   Student Dashboard Logic — QR Based Smart Library Management System
    ═══════════════════════════════════════════ */
 
 // ── Auth Guard ──

@@ -1,4 +1,4 @@
-# Library Automation System (QR-Based)
+# Smart Library (QR-Based)
 
 A comprehensive, hybrid library management solution comprising a **Node.js Web-based Admin Portal** and a **React Native (Expo) Android App** for students. It facilitates instant book retrieval, QR-based checkouts, and seamless inventory tracking.
 
@@ -90,7 +90,7 @@ React Native (Expo) requires you to generate native files before opening them in
 ### Step 3.2: Opening in Android Studio
 1. Open **Android Studio**.
 2. Click on **"Open"** or **"Open an existing project"**.
-3. Navigate to your project directory. Expand the `app` folder and specifically select the newly created **`android`** folder (`Library Automation System QR/app/android`).
+3. Navigate to your project directory. Expand the `app` folder and specifically select the newly created **`android`** folder (`Smart Library/app/android`).
 4. Click **OK**.
 
 ### Step 3.3: Gradle Sync & Building
